@@ -16,7 +16,7 @@ enum FillMethod { RANDOM = 1, MANUAL = 2 };
  * @brief точка входа в программу
  * @return 0, если программа завершена корректно
  */
-int main(
+int main()
 {
     size_t rows, cols;
     std::cout << "Введите количество строк: ";
