@@ -3,6 +3,7 @@
 #include <string>
 #include <sstream>
 #include <iostream>
+#include "Generator.h"
 
 namespace miit::algebra
 {
@@ -29,7 +30,7 @@ namespace miit::algebra
          * @param r Количество строк
          * @param c Количество столбцов
          */
-        Matrix(const size_t r, const size_t c) : rows(r), cols(c), data(r, std::vector<T>(c)) {}
+        Matrix(const size_t r,const size_t c) : rows(r), cols(c), data(r, std::vector<T>(c)) {}
 
         /**
          * @brief Деструктор по умолчанию
@@ -64,7 +65,13 @@ namespace miit::algebra
          * @param c Индекс столбца
          * @return Ссылка на элемент матрицы
          */
-        T& operator()(size_t r, size_t c) { return data[r][c]; }
+        T& operator[](size_t r, size_t c) { return data[r][c]; 
+        {
+            if (r >= rows || c >= cols) {
+                throw std::out_of_range("Индекс выходит за границы матрицы!");
+            }
+            return data[r][c];
+        }
 
         /**
          * @brief Оператор доступа к элементу матрицы по индексу 
@@ -72,7 +79,12 @@ namespace miit::algebra
          * @param c Индекс столбца
          * @return Константная ссылка на элемент матрицы
          */
-        const T& operator()(size_t r, size_t c) const { return data[r][c]; }
+        const T& operator[](size_t r, size_t c) const {
+            if (r >= rows || c >= cols) {
+                throw std::out_of_range("Индекс выходит за границы матрицы!");
+            }
+            return data[r][c];
+        }
 
         /**
          * @brief Получить количество строк матрицы
@@ -85,6 +97,20 @@ namespace miit::algebra
          * @return Количество столбцов
          */
         size_t getCols() const { return cols; }
+
+
+        /**
+         * @brief Метод заполнения матрицы с использованием переданного генератора
+         */
+        void fill(const std::shared_ptr<Generator>& generator)
+        {
+            for (size_t i = 0; i < rows; ++i) {
+                for (size_t j = 0; j < cols; ++j) {
+                    data[i][j] = static_cast<T>(generator->generate());
+                }
+            }
+        }
+
 
         /**
          * @brief Метод вывода содержимого матрицы в строку
