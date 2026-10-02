@@ -118,7 +118,7 @@ namespace miit::algebra
          * @param index Индекс строки
          * @return Вектор элементов запрошенной строки
          */
-        std::vector<T> getRow(size_t index) const
+        std::vector<T> getRow(const size_t index) const
         {
             return data[index];
         }
