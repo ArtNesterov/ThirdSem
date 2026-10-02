@@ -29,7 +29,7 @@ namespace miit::algebra
          * @param r Количество строк
          * @param c Количество столбцов
          */
-        Matrix(size_t r, size_t c) : rows(r), cols(c), data(r, std::vector<T>(c)) {}
+        Matrix(const size_t r, const size_t c) : rows(r), cols(c), data(r, std::vector<T>(c)) {}
 
         /**
          * @brief Деструктор по умолчанию
