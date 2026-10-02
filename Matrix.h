@@ -107,7 +107,7 @@ namespace miit::algebra
          * @param index Индекс, по которому будет вставлена новая строка
          * @param row Вектор элементов новой строки
          */
-        void insertRow(size_t index, const std::vector<T>& row)
+        void insertRow(const size_t index, const std::vector<T>& row)
         {
             data.insert(data.begin() + index, row);
             rows++;
