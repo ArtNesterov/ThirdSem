@@ -1,4 +1,4 @@
-﻿#include <iostream>
+#include <iostream>
 #include <memory>
 #include "RandomGenerator.h"
 #include "IStreamGenerator.h"
@@ -7,11 +7,16 @@
 
 using namespace miit::algebra;
 
+/*
+* @brief Выбор метода заполнения
+*/
+enum FillMethod { RANDOM = 1, MANUAL = 2 };
+
 /**
  * @brief точка входа в программу
  * @return 0, если программа завершена корректно
  */
-int main()
+int main(
 {
     size_t rows, cols;
     std::cout << "Введите количество строк: ";
@@ -19,23 +24,32 @@ int main()
     std::cout << "Введите количество столбцов: ";
     std::cin >> cols;
 
-    std::cout << "Выберите способ заполнения:\n1 - Случайными числами\n2 - Вручную\n";
-    int choice;
-    std::cin >> choice;
+    std::cout << "Выберите способ заполнения:\n" << FillMethod::RANDOM << " - Случайными числами\n" << FillMethod::MANUAL << " - Вручную\n";
+    int choiceInput = 0;
+    std::cin >> choiceInput;
 
+    FillMethod choice = static_cast<FillMethod>(choiceInput);
     std::shared_ptr<Generator> generator;
 
-    if (choice == 1) {
-        int min, max;
-        std::cout << "Введите начало диапазона: ";
-        std::cin >> min;
-        std::cout << "Введите конец диапазона: ";
-        std::cin >> max;
-        generator = std::make_shared<RandomGenerator>(min, max);
-    }
-    else {
-        std::cout << "Введите элементы матрицы:\n";
-        generator = std::make_shared<IStreamGenerator>(std::cin);
+    switch(choice) {
+        case FillMethod::RANDOM: {
+            int min, max;
+            std::cout << "Введите начало диапазона: ";
+            std::cin >> min;
+            std::cout << "Введите конец диапазона: ";
+            std::cin >> max;
+            generator = std::make_shared<RandomGenerator>(min, max);
+            break;
+        }
+        case FillMethod::MANUAL: {
+            std::cout << "Введите элементы матрицы:\n";
+            generator = std::make_shared<IStreamGenerator>(std::cin);
+            break;
+        }
+        default: {
+            std::cout << "Неверный выбор способа заполнения\n";
+            exit(1);
+        }
     }
 
     std::cout << "\n ЗАДАЧА 1 \n";
@@ -47,7 +61,7 @@ int main()
 
 
     std::cout << "\n ЗАДАЧА 2 \n";
-    if (choice == 2) {
+    if (choice == FillMethod::MANUAL) {
         std::cout << "Введите элементы матрицы еще раз для задачи 2:\n";
     }
 
