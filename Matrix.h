@@ -3,10 +3,24 @@
 #include <string>
 #include <sstream>
 #include <iostream>
+#include <memory>
+#include <stdexcept>
 #include "Generator.h"
 
 namespace miit::algebra
 {
+    /**
+     * @brief Вспомогательный генератор для теста метода fill()
+     */
+    class ConstTestGenerator : public miit::algebra::Generator
+    {
+    private:
+        int value;
+    public:
+        ConstTestGenerator(const int val) : value(val) {}
+        int generate() override { return value; }
+    };
+
     /**
      * @brief Шаблонный класс матрицы
      * @param T Тип элементов матрицы
@@ -30,7 +44,9 @@ namespace miit::algebra
          * @param r Количество строк
          * @param c Количество столбцов
          */
-        Matrix(const size_t r,const size_t c) : rows(r), cols(c), data(r, std::vector<T>(c)) {}
+        Matrix(const size_t r, const size_t c)
+            : rows(r), cols(c), data(r, std::vector<T>(c)) {
+        }
 
         /**
          * @brief Деструктор по умолчанию
@@ -45,27 +61,25 @@ namespace miit::algebra
         /**
          * @brief Конструктор перемещения
          */
-        Matrix(Matrix&&) = default;
+        Matrix(Matrix&&) noexcept = default;
 
         /**
          * @brief Оператор присваивания копированием
-         * @return Ссылка на текущий объект
          */
         Matrix& operator=(const Matrix&) = default;
 
         /**
          * @brief Оператор присваивания перемещением
-         * @return Ссылка на текущий объект
          */
-        Matrix& operator=(Matrix&&) = default;
+        Matrix& operator=(Matrix&&) noexcept = default;
 
         /**
-         * @brief Оператор доступа к элементу матрицы по индексу 
+         * @brief Оператор доступа к элементу матрицы по индексу
          * @param r Индекс строки
          * @param c Индекс столбца
          * @return Ссылка на элемент матрицы
          */
-        T& operator[](size_t r, size_t c) { return data[r][c]; 
+        T& operator[](size_t r, size_t c)
         {
             if (r >= rows || c >= cols) {
                 throw std::out_of_range("Индекс выходит за границы матрицы!");
@@ -74,12 +88,13 @@ namespace miit::algebra
         }
 
         /**
-         * @brief Оператор доступа к элементу матрицы по индексу 
+         * @brief Оператор доступа к элементу матрицы по индексу
          * @param r Индекс строки
          * @param c Индекс столбца
          * @return Константная ссылка на элемент матрицы
          */
-        const T& operator[](size_t r, size_t c) const {
+        const T& operator[](size_t r, size_t c) const
+        {
             if (r >= rows || c >= cols) {
                 throw std::out_of_range("Индекс выходит за границы матрицы!");
             }
@@ -88,19 +103,16 @@ namespace miit::algebra
 
         /**
          * @brief Получить количество строк матрицы
-         * @return Количество строк
          */
         size_t getRows() const { return rows; }
 
         /**
          * @brief Получить количество столбцов матрицы
-         * @return Количество столбцов
          */
         size_t getCols() const { return cols; }
 
-
         /**
-         * @brief Метод заполнения матрицы с использованием переданного генератора
+         * @brief Заполнение матрицы с использованием генератора
          */
         void fill(const std::shared_ptr<Generator>& generator)
         {
@@ -111,11 +123,10 @@ namespace miit::algebra
             }
         }
 
-
         /**
-         * @brief Метод вывода содержимого матрицы в строку
-         * @return Строковое представление матрицы
-         */
+        * @brief Метод вывода содержимого матрицы в строку
+        * @return Строковое представление матрицы
+        */
         std::string toString() const
         {
             std::ostringstream oss;
