@@ -21,13 +21,22 @@ namespace miit::algebra
          * @param c Количество столбцов
          * @param gen Указатель на объект генератора (Random или IStream)
          */
-        Exercise(size_t r, size_t c, std::shared_ptr<Generator> gen) : matrix(r, c), generator(gen)
+        Exercise(const size_t r, const size_t c, const std::shared_ptr<Generator> gen)
+            : matrix(r, c), generator(gen)
         {
-            for (size_t i = 0; i < r; ++i) {
-                for (size_t j = 0; j < c; ++j) {
-                    matrix(i, j) = generator->generate();
-                }
-            }
+            matrix.fill(generator);
+        }
+
+        /**
+         * @brief Конструктор со ссылкой на генератор (поддерживает оба варианта передачи)
+         * @param r Количество строк
+         * @param c Количество столбцов
+         * @param gen Ссылка на генератор
+         */
+        Exercise(const size_t r, const size_t c, Generator& gen)
+            : matrix(r, c), generator(nullptr)
+        {
+            matrix.fill(gen);
         }
 
         /**
