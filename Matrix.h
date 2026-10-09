@@ -9,17 +9,6 @@
 
 namespace miit::algebra
 {
-    /**
-     * @brief Вспомогательный генератор для теста метода fill()
-     */
-    class ConstTestGenerator : public miit::algebra::Generator
-    {
-    private:
-        int value;
-    public:
-        ConstTestGenerator(const int val) : value(val) {}
-        int generate() override { return value; }
-    };
 
     /**
      * @brief Шаблонный класс матрицы
@@ -73,27 +62,39 @@ namespace miit::algebra
          */
         Matrix& operator=(Matrix&&) noexcept = default;
 
+        std::vector<T>& operator[](const size_t r)
+        {
+            if (r >= rows) {
+                throw std::out_of_range("Индекс строки выходит за границы матрицы!");
+            }
+            return data[r];
+        }
+
+
         /**
-         * @brief Оператор доступа к элементу матрицы по индексу
+         * @brief Оператор индексации строки (константный)
          * @param r Индекс строки
-         * @param c Индекс столбца
-         * @return Ссылка на элемент матрицы
+         * @return Константная ссылка на вектор строки
          */
-        T& operator[](size_t r, size_t c)
+        const std::vector<T>& operator[](const size_t r) const
+        {
+            if (r >= rows) {
+                throw std::out_of_range("Индекс строки выходит за границы матрицы!");
+            }
+            return data[r];
+        }
+
+        /**
+         * @brief Дополнительный оператор доступа по координатам (r, c)
+         */
+        T& operator()(const size_t r, const size_t c)
         {
             if (r >= rows || c >= cols) {
                 throw std::out_of_range("Индекс выходит за границы матрицы!");
             }
             return data[r][c];
         }
-
-        /**
-         * @brief Оператор доступа к элементу матрицы по индексу
-         * @param r Индекс строки
-         * @param c Индекс столбца
-         * @return Константная ссылка на элемент матрицы
-         */
-        const T& operator[](size_t r, size_t c) const
+        const T& operator()(const size_t r, const size_t c) const
         {
             if (r >= rows || c >= cols) {
                 throw std::out_of_range("Индекс выходит за границы матрицы!");
@@ -112,14 +113,24 @@ namespace miit::algebra
         size_t getCols() const { return cols; }
 
         /**
-         * @brief Заполнение матрицы с использованием генератора
+         * @brief Заполнение матрицы с использованием ссылки на генератор
          */
-        void fill(const std::shared_ptr<Generator>& generator)
+        void fill(Generator& generator)
         {
             for (size_t i = 0; i < rows; ++i) {
                 for (size_t j = 0; j < cols; ++j) {
-                    data[i][j] = static_cast<T>(generator->generate());
+                    data[i][j] = static_cast<T>(generator.generate());
                 }
+            }
+        }
+
+        /**
+         * @brief Заполнение матрицы с использованием указателя на генератор
+         */
+        void fill(const std::shared_ptr<Generator>& generator)
+        {
+            if (generator) {
+                this->fill(*generator);
             }
         }
 
@@ -146,6 +157,9 @@ namespace miit::algebra
          */
         void insertRow(const size_t index, const std::vector<T>& row)
         {
+            if (index > rows) {
+                throw std::out_of_range("Индекс вставки выходит за границы матрицы");
+            }
             data.insert(data.begin() + index, row);
             rows++;
         }
@@ -157,6 +171,9 @@ namespace miit::algebra
          */
         std::vector<T> getRow(const size_t index) const
         {
+            if (index >= rows) {
+                throw std::out_of_range("Индекс строки выходит за границы матрицы");
+            }
             return data[index];
         }
 
@@ -171,5 +188,21 @@ namespace miit::algebra
             os << matrix.toString();
             return os;
         }
+
+        /**
+        * @brief Переопределение оператора сдвига вправо (ввод матрицы из потока)
+        * @param in Поток ввода
+        * @param matrix Матрица для ывода
+        */
+        friend std::istream& operator>>(std::istream& is, Matrix<T>& matrix)
+        {
+            for (size_t i = 0; i < matrix.rows; ++i) {
+                for (size_t j = 0; j < matrix.cols; ++j) {
+                    is >> matrix.data[i][j];
+                }
+            }
+            return is;
+        }
+
     };
 }

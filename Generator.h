@@ -5,7 +5,7 @@ namespace miit::algebra
     class Generator
     {
     public:
-        virtual ~Generator() = default;
+        virtual ~Generator() = 0 {};
         virtual int generate() = 0;
     };
 }
