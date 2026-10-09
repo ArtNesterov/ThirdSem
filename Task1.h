@@ -15,7 +15,7 @@ namespace miit::algebra
          * @param c Количество столбцов
          * @param gen Указатель на генератор
          */
-        Task1(const size_t r, const size_t c, const std::shared_ptr<Generator>& gen);
+        Task1(const size_t r, const size_t c, Generator& gen);
 
         /**
          * @brief Выполняет замену максимального элемента каждого столбца нулем

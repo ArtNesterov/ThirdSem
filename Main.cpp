@@ -33,7 +33,11 @@ int main()
     std::cin >> choiceInput;
 
     FillMethod choice = static_cast<FillMethod>(choiceInput);
-    std::shared_ptr<Generator> generator;
+    Generator* generator = nullptr;
+
+    RandomGenerator randomGen(0, 0);
+    IStreamGenerator streamGen(std::cin);
+    ConstGenerator constGen(0);
 
     switch (choice) {
     case FillMethod::RANDOM: {
@@ -42,19 +46,21 @@ int main()
         std::cin >> min;
         std::cout << "Введите конец диапазона: ";
         std::cin >> max;
-        generator = std::make_shared<RandomGenerator>(min, max);
+        randomGen = RandomGenerator(min, max);
+        generator = &randomGen;
         break;
     }
     case FillMethod::MANUAL: {
         std::cout << "Введите элементы матрицы:\n";
-        generator = std::make_shared<IStreamGenerator>(std::cin);
+        generator = &streamGen;
         break;
     }
     case FillMethod::CONSTANT: {
         int val;
         std::cout << "Введите константное значение: ";
         std::cin >> val;
-        generator = std::make_shared<ConstGenerator>(val);
+        constGen = ConstGenerator(val);
+        generator = &constGen;
         break;
     }
     default: {
@@ -64,7 +70,7 @@ int main()
     }
 
     std::cout << "\n ЗАДАЧА 1 \n";
-    Task1 task1(rows, cols, generator);
+    Task1 task1(rows, cols, *generator);
     std::cout << "Исходная матрица:\n" << task1.getMatrix();
     task1.solve();
     std::cout << "Результат задачи 1 (Заменить максимальный элемент столбца нулем):\n" << task1.getMatrix();
@@ -76,7 +82,7 @@ int main()
         std::cout << "Введите элементы матрицы еще раз для задачи 2:\n";
     }
 
-    Task2 task2(rows, cols, generator);
+    Task2 task2(rows, cols, *generator);
     std::cout << "Исходная матрица:\n" << task2.getMatrix();
     task2.solve();
     std::cout << "Результат задачи 2 (Вставить первую строку после строки с max модулем):\n" << task2.getMatrix();

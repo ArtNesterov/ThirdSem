@@ -3,7 +3,6 @@
 #include <string>
 #include <sstream>
 #include <iostream>
-#include <memory>
 #include <stdexcept>
 #include "Generator.h"
 
@@ -70,7 +69,7 @@ namespace miit::algebra
             return data[r];
         }
 
-
+        
         /**
          * @brief Оператор индексации строки (константный)
          * @param r Индекс строки
@@ -84,23 +83,6 @@ namespace miit::algebra
             return data[r];
         }
 
-        /**
-         * @brief Дополнительный оператор доступа по координатам (r, c)
-         */
-        T& operator()(const size_t r, const size_t c)
-        {
-            if (r >= rows || c >= cols) {
-                throw std::out_of_range("Индекс выходит за границы матрицы!");
-            }
-            return data[r][c];
-        }
-        const T& operator()(const size_t r, const size_t c) const
-        {
-            if (r >= rows || c >= cols) {
-                throw std::out_of_range("Индекс выходит за границы матрицы!");
-            }
-            return data[r][c];
-        }
 
         /**
          * @brief Получить количество строк матрицы
@@ -121,16 +103,6 @@ namespace miit::algebra
                 for (size_t j = 0; j < cols; ++j) {
                     data[i][j] = static_cast<T>(generator.generate());
                 }
-            }
-        }
-
-        /**
-         * @brief Заполнение матрицы с использованием указателя на генератор
-         */
-        void fill(const std::shared_ptr<Generator>& generator)
-        {
-            if (generator) {
-                this->fill(*generator);
             }
         }
 

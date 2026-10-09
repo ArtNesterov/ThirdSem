@@ -1,6 +1,6 @@
 #include "Task1.h"
 
-miit::algebra::Task1::Task1(const size_t r, const size_t c, const std::shared_ptr<Generator>& gen)
+miit::algebra::Task1::Task1(const size_t r, const size_t c, Generator& gen) 
     : Exercise(r, c, gen)
 {
 }

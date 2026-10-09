@@ -1,9 +1,8 @@
 #include "Task2.h"
 #include <cmath>
 #include <vector>
-
-miit::algebra::Task2::Task2(const size_t r, const size_t c, const std::shared_ptr<Generator>& gen)
-    : Exercise(r, c, gen) 
+miit::algebra::Task2::Task2(const size_t r, const size_t c, Generator& gen)
+    : Exercise(r, c, gen)
 {
 }
 

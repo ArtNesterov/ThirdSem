@@ -113,20 +113,7 @@ namespace Tests
                 m[2][0] = 10; 
                 });
         }
-        /**
-         * @brief Проверка оператора operator()(r, c)
-         */
-        TEST_METHOD(CallOperator_Test)
-        {
-            Matrix<int> m(2, 2);
-            m(0, 1) = 55;
-            Assert::AreEqual(55, m(0, 1));
-            const Matrix<int>& cm = m;
-            Assert::AreEqual(55, cm(0, 1));
-            Assert::ExpectException<std::out_of_range>([&]() {
-                m(5, 5);
-                });
-        }
+       
         /**
          * @brief Проверка метода fill() с использованием генератора
          */
@@ -224,22 +211,24 @@ namespace Tests
         TEST_METHOD(Task1_Logic_Test)
         {
             std::istringstream input("1 4 3 2");
-            auto gen = std::make_shared<IStreamGenerator>(input);
+            IStreamGenerator gen(input); 
             Task1 task(2, 2, gen);
             task.solve();
             Matrix<int> res = task.getMatrix();
             Assert::AreEqual(1, res[0][0]);
             Assert::AreEqual(0, res[0][1]);
+            Assert::AreEqual(0, res[0][0 + 1]);
             Assert::AreEqual(0, res[1][0]);
             Assert::AreEqual(2, res[1][1]);
         }
+
         /**
          * @brief Проверка вставки первой строки после строки с max элементом по модулю
          */
         TEST_METHOD(Task2_Logic_Test)
         {
             std::istringstream input("1 2 -5 4");
-            auto gen = std::make_shared<IStreamGenerator>(input);
+            IStreamGenerator gen(input);
             Task2 task(2, 2, gen);
             task.solve();
             Matrix<int> res = task.getMatrix();
