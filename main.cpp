@@ -15,8 +15,6 @@
  */
 int main()
 {
-    SetConsoleCP(CP_UTF8);
-    SetConsoleOutputCP(CP_UTF8);
 
     Schedule therapistSchedule("Пн - Пт", "08:00", "14:00", "Кабинет 101");
     Schedule surgeonSchedule("Вт, Чт", "10:00", "16:00", "Кабинет 205");
