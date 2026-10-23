@@ -44,7 +44,6 @@ int main()
         "Васильев", "Дмитрий", "Николаевич", "ID-1003",
         "5555444433332222", "03.09.1978", "+7 (903) 777-88-99");
 
-
     std::vector<std::shared_ptr<Person>> people = { doc1, pat1, doc2, pat2, doc3, pat3 };
     for (const auto& personPtr : people)
     {

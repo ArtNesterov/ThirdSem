@@ -1,8 +1,11 @@
 #include "Person.h"
 #include <utility>
+#include <stdexcept>
+
+size_t Person::nextId = 0;
 
 Person::Person()
-    : surname(""), name(""), patronymic(""), id("")
+    : surname(""), name(""), patronymic(""), id(std::to_string(++nextId))
 {
 }
 
@@ -10,6 +13,10 @@ Person::Person(const std::string& surname, const std::string& name,
                const std::string& patronymic, const std::string& id)
     : surname(surname), name(name), patronymic(patronymic), id(id)
 {
+    if (this->id.empty() || this->id.find_first_not_of(" \t\n\r") == std::string::npos)
+    {
+        throw std::invalid_argument("ID не может быть пустым");
+    }
 }
 
 Person::Person(const Person& other)
@@ -57,9 +64,9 @@ const std::string& Person::GetSurname() const
     return surname;
 }
 
-void Person::SetSurname(const std::string& newSurname)
+void Person::SetSurname(const std::string& s)
 {
-    surname = newSurname;
+    surname = s;
 }
 
 const std::string& Person::GetName() const
@@ -67,9 +74,9 @@ const std::string& Person::GetName() const
     return name;
 }
 
-void Person::SetName(const std::string& newName)
+void Person::SetName(const std::string& n)
 {
-    name = newName;
+    name = n;
 }
 
 const std::string& Person::GetPatronymic() const
@@ -77,9 +84,9 @@ const std::string& Person::GetPatronymic() const
     return patronymic;
 }
 
-void Person::SetPatronymic(const std::string& newPatronymic)
+void Person::SetPatronymic(const std::string& p)
 {
-    patronymic = newPatronymic;
+    patronymic = p;
 }
 
 const std::string& Person::GetId() const
@@ -89,32 +96,52 @@ const std::string& Person::GetId() const
 
 void Person::SetId(const std::string& newId)
 {
+    if (newId.empty() || newId.find_first_not_of(" \t\n\r") == std::string::npos)
+    {
+        throw std::invalid_argument("Идентификатор (id) не может быть пустым");
+    }
     id = newId;
 }
 
 std::string Person::GetFullName() const
 {
-    std::string fullName = surname + " " + name;
+    std::string fullName = surname;
+    if (!name.empty())
+    {
+        if (!fullName.empty()) fullName += " ";
+        fullName += name;
+    }
     if (!patronymic.empty())
     {
-        fullName += " " + patronymic;
+        if (!fullName.empty()) fullName += " ";
+        fullName += patronymic;
     }
     return fullName;
 }
 
+size_t Person::GetNextId()
+{
+    return nextId;
+}
+
+void Person::ResetNextId(const size_t start)
+{
+    nextId = start;
+}
+
 std::string Person::ToString() const
 {
-    std::string res = "[Человек] ФИО: " + GetFullName();
+    std::string res = GetFullName();
     if (!id.empty())
     {
-        res += " | Идентификатор: " + id;
+        res += " (ID: " + id + ")";
     }
     return res;
 }
 
 std::string Person::GetSummary() const
 {
-    return ToString();
+    return GetFullName();
 }
 
 bool Person::operator==(const Person& other) const

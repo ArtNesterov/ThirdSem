@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include <stdexcept>
 
 #include "Person.h"
 #include "Schedule.h"
@@ -25,6 +26,7 @@ namespace Tests
         {
             Person p1;
             Assert::IsTrue(p1.GetSurname().empty());
+            Assert::IsFalse(p1.GetId().empty());
 
             Person p2("Иванов", "Иван", "Иванович", "ID-1");
             Assert::AreEqual(std::string("Иванов"), p2.GetSurname());
@@ -35,8 +37,29 @@ namespace Tests
 
             p1.SetSurname("Петров");
             p1.SetName("Петр");
+            p1.SetId("NEW-ID");
             Assert::AreEqual(std::string("Петров"), p1.GetSurname());
             Assert::AreEqual(std::string("Петр"), p1.GetName());
+            Assert::AreEqual(std::string("NEW-ID"), p1.GetId());
+        }
+
+        /**
+         * @brief Проверка валидации ID (id не может быть пустым)
+         */
+        TEST_METHOD(IdValidation_Test)
+        {
+            Assert::ExpectException<std::invalid_argument>([]() {
+                Person p("Иванов", "Иван", "Иванович", "");
+            });
+
+            Assert::ExpectException<std::invalid_argument>([]() {
+                Person p("Иванов", "Иван", "Иванович", "   ");
+            });
+
+            Person p;
+            Assert::ExpectException<std::invalid_argument>([&]() {
+                p.SetId("");
+            });
         }
 
         /**
@@ -215,14 +238,39 @@ namespace Tests
             auto doc = std::make_shared<Doctor>("Иванов", "Иван", "Иванович", "DOC-1", "Терапевт", 10, s);
             auto pat = std::make_shared<Patient>("Петров", "Петр", "Петрович", "ID-1", "123456", "01.01.1980", "+7-999-111");
 
-            Appointment app(1, doc, pat, "25.10.2026 10:00");
-            Assert::AreEqual(1, app.GetId());
+            Appointment app(101, doc, pat, "25.10.2026 10:00");
+            Assert::AreEqual(101, app.GetId());
             Assert::IsTrue(app.GetDoctor() == doc);
             Assert::IsTrue(app.GetPatient() == pat);
             Assert::AreEqual(std::string("25.10.2026 10:00"), app.GetAppointmentDateTime());
 
             Assert::IsTrue(app.ToString().find("Иванов") != std::string::npos);
             Assert::IsTrue(app.GetSummary().find("25.10.2026 10:00") != std::string::npos);
+        }
+
+        /**
+         * @brief Проверка валидации ID записи и проверки отсутствия дубликатов
+         */
+        TEST_METHOD(IdValidationAndUniqueness_Test)
+        {
+            Schedule s("Пн", "08:00", "12:00", "101");
+            auto doc = std::make_shared<Doctor>("Иванов", "И.", "И.", "D-1", "Терапевт", 5, s);
+            auto pat = std::make_shared<Patient>("Петров", "П.", "П.", "P-1", "123", "01.01.1990", "+7");
+
+            Assert::ExpectException<std::invalid_argument>([&]() {
+                Appointment invalidApp(0, doc, pat, "20.10.2026 10:00");
+            });
+
+            Assert::ExpectException<std::invalid_argument>([&]() {
+                Appointment invalidApp(-5, doc, pat, "20.10.2026 10:00");
+            });
+
+            Appointment app1(201, doc, pat, "20.10.2026 10:00");
+
+            // Проверка, что ID уже занят (id проверка, что такого нет)
+            Assert::ExpectException<std::invalid_argument>([&]() {
+                Appointment duplicateApp(201, doc, pat, "20.10.2026 11:00");
+            });
         }
 
         /**
@@ -234,7 +282,7 @@ namespace Tests
             auto doc = std::make_shared<Doctor>("Смирнов", "Е.", "П.", "D-2", "Хирург", 5, s);
             auto pat = std::make_shared<Patient>("Васильев", "Д.", "Н.", "P-2", "999888", "10.02.1995", "+7");
 
-            Appointment app1(10, doc, pat, "20.10.2026 12:00");
+            Appointment app1(301, doc, pat, "20.10.2026 12:00");
             Appointment copy(app1);
             Assert::IsTrue(app1 == copy);
 
@@ -243,12 +291,12 @@ namespace Tests
             Assert::IsTrue(app1 == assigned);
 
             Appointment moved(std::move(copy));
-            Assert::AreEqual(10, moved.GetId());
+            Assert::AreEqual(301, moved.GetId());
             Assert::AreEqual(std::string("20.10.2026 12:00"), moved.GetAppointmentDateTime());
 
             Appointment moveAssigned;
             moveAssigned = std::move(assigned);
-            Assert::AreEqual(10, moveAssigned.GetId());
+            Assert::AreEqual(301, moveAssigned.GetId());
         }
     };
 
@@ -324,8 +372,8 @@ namespace Tests
             clinic.AddPatient(pat);
 
             auto app = clinic.RegisterAppointment(doc, pat, "25.10.2026 10:30");
-            Assert::AreEqual(1, app->GetId());
-            Assert::IsTrue(clinic.FindAppointmentById(1) == app);
+            Assert::IsTrue(app->GetId() > 0);
+            Assert::IsTrue(clinic.FindAppointmentById(app->GetId()) == app);
 
             std::string appInfo = clinic.GetAppointmentInfo(app->GetId());
             Assert::IsTrue(appInfo.find("Иванов Иван Иванович") != std::string::npos);
@@ -334,7 +382,7 @@ namespace Tests
             std::string patInfo = clinic.GetPatientAppointmentsInfo("1234567890123456");
             Assert::IsTrue(patInfo.find("Иванов Иван Иванович") != std::string::npos);
 
-            Assert::IsTrue(clinic.GetAppointmentInfo(999).find("не найдена") != std::string::npos);
+            Assert::IsTrue(clinic.GetAppointmentInfo(9999).find("не найдена") != std::string::npos);
             Assert::IsTrue(clinic.GetPatientAppointmentsInfo("000000").find("не найден") != std::string::npos);
         }
 

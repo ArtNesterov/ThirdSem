@@ -48,12 +48,9 @@ Polyclinic::Polyclinic(const Polyclinic& other)
             std::shared_ptr<Doctor> mappedDoc = (docIt != docMap.end()) ? docIt->second : (app->GetDoctor() ? std::make_shared<Doctor>(*app->GetDoctor()) : nullptr);
             std::shared_ptr<Patient> mappedPat = (patIt != patMap.end()) ? patIt->second : (app->GetPatient() ? std::make_shared<Patient>(*app->GetPatient()) : nullptr);
 
-            auto newApp = std::make_shared<Appointment>(
-                app->GetId(),
-                mappedDoc,
-                mappedPat,
-                app->GetAppointmentDateTime()
-            );
+            auto newApp = std::make_shared<Appointment>(*app);
+            newApp->SetDoctor(mappedDoc);
+            newApp->SetPatient(mappedPat);
             appointments.push_back(newApp);
         }
     }
@@ -136,6 +133,10 @@ std::shared_ptr<Appointment> Polyclinic::RegisterAppointment(
     const std::shared_ptr<Patient>& patient,
     const std::string& dateTime)
 {
+    while (Appointment::IsIdExists(nextAppointmentId))
+    {
+        nextAppointmentId++;
+    }
     const int apptId = nextAppointmentId++;
     auto appt = std::make_shared<Appointment>(apptId, doctor, patient, dateTime);
     appointments.push_back(appt);

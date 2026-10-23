@@ -8,6 +8,7 @@
 class Person
 {
 protected:
+    static size_t nextId;
     std::string surname;
     std::string name;
     std::string patronymic;
@@ -15,7 +16,7 @@ protected:
 
 public:
     /**
-     * @brief Конструктор по умолчанию
+     * @brief Конструктор по умолчанию с автоматической генерацией ключа
      */
     Person();
 
@@ -24,10 +25,10 @@ public:
      * @param surname Фамилия
      * @param name Имя
      * @param patronymic Отчество
-     * @param id Идентификатор 
+     * @param id Идентификатор (ключ)
      */
     Person(const std::string& surname, const std::string& name,
-           const std::string& patronymic = "", const std::string& id = "");
+           const std::string& patronymic, const std::string& id);
 
     /**
      * @brief Виртуальный деструктор по умолчанию
@@ -113,6 +114,18 @@ public:
      * @return Строка формата "Фамилия Имя Отчество"
      */
     std::string GetFullName() const;
+
+    /**
+     * @brief Получить текущее значение статического счетчика ключей
+     * @return Текущее значение счетчика ключей
+     */
+    static size_t GetNextId();
+
+    /**
+     * @brief Сбросить статический счетчик ключей
+     * @param start Начальное значение (по умолчанию 0)
+     */
+    static void ResetNextId(const size_t start = 0);
 
     /**
      * @brief Виртуальный метод строкового представления объекта

@@ -1,5 +1,9 @@
 #include "Appointment.h"
 #include <utility>
+#include <stdexcept>
+
+std::set<int> Appointment::existingIds;
+std::map<int, int> Appointment::idRefCount;
 
 Appointment::Appointment()
     : id(0), doctor(nullptr), patient(nullptr), appointmentDateTime("")
@@ -15,6 +19,32 @@ Appointment::Appointment(const int id,
       patient(patient),
       appointmentDateTime(appointmentDateTime)
 {
+    if (this->id <= 0)
+    {
+        throw std::invalid_argument("ID записи должен быть больше нуля");
+    }
+    if (existingIds.find(this->id) != existingIds.end())
+    {
+        throw std::invalid_argument("Запись с ID " + std::to_string(this->id) + " уже существует");
+    }
+    existingIds.insert(this->id);
+    idRefCount[this->id] = 1;
+}
+
+Appointment::~Appointment()
+{
+    if (id > 0)
+    {
+        auto it = idRefCount.find(id);
+        if (it != idRefCount.end())
+        {
+            if (--it->second <= 0)
+            {
+                idRefCount.erase(it);
+                existingIds.erase(id);
+            }
+        }
+    }
 }
 
 Appointment::Appointment(const Appointment& other)
@@ -23,16 +53,35 @@ Appointment::Appointment(const Appointment& other)
       patient(other.patient),
       appointmentDateTime(other.appointmentDateTime)
 {
+    if (id > 0)
+    {
+        idRefCount[id]++;
+    }
 }
 
 Appointment& Appointment::operator=(const Appointment& other)
 {
     if (this != &other)
     {
+        if (id > 0)
+        {
+            auto it = idRefCount.find(id);
+            if (it != idRefCount.end() && --it->second <= 0)
+            {
+                idRefCount.erase(it);
+                existingIds.erase(id);
+            }
+        }
+
         id = other.id;
         doctor = other.doctor;
         patient = other.patient;
         appointmentDateTime = other.appointmentDateTime;
+
+        if (id > 0)
+        {
+            idRefCount[id]++;
+        }
     }
     return *this;
 }
@@ -50,6 +99,16 @@ Appointment& Appointment::operator=(Appointment&& other) noexcept
 {
     if (this != &other)
     {
+        if (id > 0)
+        {
+            auto it = idRefCount.find(id);
+            if (it != idRefCount.end() && --it->second <= 0)
+            {
+                idRefCount.erase(it);
+                existingIds.erase(id);
+            }
+        }
+
         id = other.id;
         doctor = std::move(other.doctor);
         patient = std::move(other.patient);
@@ -66,7 +125,26 @@ int Appointment::GetId() const
 
 void Appointment::SetId(const int newId)
 {
+    if (newId <= 0)
+    {
+        throw std::invalid_argument("ID записи должен быть больше нуля");
+    }
+    if (newId != id && existingIds.find(newId) != existingIds.end())
+    {
+        throw std::invalid_argument("Запись с ID " + std::to_string(newId) + " уже существует");
+    }
+    if (id > 0)
+    {
+        auto it = idRefCount.find(id);
+        if (it != idRefCount.end() && --it->second <= 0)
+        {
+            idRefCount.erase(it);
+            existingIds.erase(id);
+        }
+    }
     id = newId;
+    existingIds.insert(id);
+    idRefCount[id] = 1;
 }
 
 const std::shared_ptr<Doctor>& Appointment::GetDoctor() const
@@ -97,6 +175,17 @@ const std::string& Appointment::GetAppointmentDateTime() const
 void Appointment::SetAppointmentDateTime(const std::string& dateTime)
 {
     appointmentDateTime = dateTime;
+}
+
+bool Appointment::IsIdExists(const int searchId)
+{
+    return existingIds.find(searchId) != existingIds.end();
+}
+
+void Appointment::ResetRegistry()
+{
+    existingIds.clear();
+    idRefCount.clear();
 }
 
 std::string Appointment::ToString() const

@@ -23,7 +23,7 @@ public:
      * @param surname Фамилия
      * @param name Имя
      * @param patronymic Отчество
-     * @param id Идентификатор (паспорт/СНИЛС)
+     * @param id Идентификатор
      * @param policyNumber Номер полиса ОМС
      * @param birthDate Дата рождения
      * @param phone Номер контактного телефона

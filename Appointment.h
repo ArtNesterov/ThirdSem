@@ -2,6 +2,8 @@
 
 #include <string>
 #include <memory>
+#include <set>
+#include <map>
 #include "Doctor.h"
 #include "Patient.h"
 
@@ -11,6 +13,8 @@
 class Appointment
 {
 private:
+    static std::set<int> existingIds;
+    static std::map<int, int> idRefCount;
     int id;
     std::shared_ptr<Doctor> doctor;
     std::shared_ptr<Patient> patient;
@@ -23,7 +27,7 @@ public:
     Appointment();
 
     /**
-     * @brief Конструктор с параметрами
+     * @brief Конструктор с параметрами и проверкой уникальности ID
      * @param id Идентификатор записи
      * @param doctor Указатель на врача
      * @param patient Указатель на пациента
@@ -35,9 +39,9 @@ public:
                 const std::string& appointmentDateTime);
 
     /**
-     * @brief Деструктор по умолчанию
+     * @brief Деструктор с освобождением идентификатора из реестра
      */
-    ~Appointment() = default;
+    ~Appointment();
 
     /**
      * @brief Конструктор копирования
@@ -72,7 +76,7 @@ public:
     int GetId() const;
 
     /**
-     * @brief Установить идентификатор записи
+     * @brief Установить идентификатор записи с проверкой на дубликат
      * @param id Новый идентификатор записи
      */
     void SetId(const int id);
@@ -112,6 +116,18 @@ public:
      * @param dateTime Новая дата и время
      */
     void SetAppointmentDateTime(const std::string& dateTime);
+
+    /**
+     * @brief Проверить, существует ли запись с указанным ID
+     * @param id Идентификатор для проверки
+     * @return true, если ID уже занят, иначе false
+     */
+    static bool IsIdExists(const int id);
+
+    /**
+     * @brief Очистить статический реестр занятых идентификаторов
+     */
+    static void ResetRegistry();
 
     /**
      * @brief Полная строковая информация о записи к врачу
