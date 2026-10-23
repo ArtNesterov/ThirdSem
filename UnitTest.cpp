@@ -1,6 +1,5 @@
 #include "CppUnitTest.h"
 
-#include <memory>
 #include <vector>
 #include <string>
 #include <stdexcept>
@@ -151,15 +150,15 @@ namespace Tests
         TEST_METHOD(DoctorAndPolymorphism_Test)
         {
             Schedule s("Пн-Пт", "08:00", "14:00", "101");
-            auto doc = std::make_shared<Doctor>("Иванов", "Иван", "Иванович", "DOC-1", "Терапевт", 10, s);
+            Doctor doc("Иванов", "Иван", "Иванович", "DOC-1", "Терапевт", 10, s);
 
-            Assert::AreEqual(std::string("Терапевт"), doc->GetSpecialization());
-            Assert::AreEqual(10, doc->GetExperienceYears());
-            Assert::AreEqual(std::string("101"), doc->GetCabinet());
+            Assert::AreEqual(std::string("Терапевт"), doc.GetSpecialization());
+            Assert::AreEqual(10, doc.GetExperienceYears());
+            Assert::AreEqual(std::string("101"), doc.GetCabinet());
 
-            std::shared_ptr<Person> person = doc;
+            Person* person = &doc;
             Assert::IsTrue(person->ToString().find("Терапевт") != std::string::npos);
-            Assert::IsTrue(doc->GetSummary().find("Иванов") != std::string::npos);
+            Assert::IsTrue(doc.GetSummary().find("Иванов") != std::string::npos);
         }
 
         /**
@@ -193,15 +192,15 @@ namespace Tests
          */
         TEST_METHOD(PatientAndPolymorphism_Test)
         {
-            auto pat = std::make_shared<Patient>("Петров", "Петр", "Петрович", "ID-1", "1234567890123456", "15.05.1985", "+7-916-111");
+            Patient pat("Петров", "Петр", "Петрович", "ID-1", "1234567890123456", "15.05.1985", "+7-916-111");
 
-            Assert::AreEqual(std::string("1234567890123456"), pat->GetPolicyNumber());
-            Assert::AreEqual(std::string("15.05.1985"), pat->GetBirthDate());
-            Assert::AreEqual(std::string("+7-916-111"), pat->GetPhone());
+            Assert::AreEqual(std::string("1234567890123456"), pat.GetPolicyNumber());
+            Assert::AreEqual(std::string("15.05.1985"), pat.GetBirthDate());
+            Assert::AreEqual(std::string("+7-916-111"), pat.GetPhone());
 
-            std::shared_ptr<Person> person = pat;
+            Person* person = &pat;
             Assert::IsTrue(person->ToString().find("1234567890123456") != std::string::npos);
-            Assert::IsTrue(pat->GetSummary().find("Петров") != std::string::npos);
+            Assert::IsTrue(pat.GetSummary().find("Петров") != std::string::npos);
         }
 
         /**
@@ -235,13 +234,13 @@ namespace Tests
         TEST_METHOD(Appointment_Test)
         {
             Schedule s("Пн - Пт", "08:00", "14:00", "101");
-            auto doc = std::make_shared<Doctor>("Иванов", "Иван", "Иванович", "DOC-1", "Терапевт", 10, s);
-            auto pat = std::make_shared<Patient>("Петров", "Петр", "Петрович", "ID-1", "123456", "01.01.1980", "+7-999-111");
+            Doctor doc("Иванов", "Иван", "Иванович", "DOC-1", "Терапевт", 10, s);
+            Patient pat("Петров", "Петр", "Петрович", "ID-1", "123456", "01.01.1980", "+7-999-111");
 
-            Appointment app(101, doc, pat, "25.10.2026 10:00");
+            Appointment app(101, &doc, &pat, "25.10.2026 10:00");
             Assert::AreEqual(101, app.GetId());
-            Assert::IsTrue(app.GetDoctor() == doc);
-            Assert::IsTrue(app.GetPatient() == pat);
+            Assert::IsTrue(app.GetDoctor() == &doc);
+            Assert::IsTrue(app.GetPatient() == &pat);
             Assert::AreEqual(std::string("25.10.2026 10:00"), app.GetAppointmentDateTime());
 
             Assert::IsTrue(app.ToString().find("Иванов") != std::string::npos);
@@ -254,22 +253,22 @@ namespace Tests
         TEST_METHOD(IdValidationAndUniqueness_Test)
         {
             Schedule s("Пн", "08:00", "12:00", "101");
-            auto doc = std::make_shared<Doctor>("Иванов", "И.", "И.", "D-1", "Терапевт", 5, s);
-            auto pat = std::make_shared<Patient>("Петров", "П.", "П.", "P-1", "123", "01.01.1990", "+7");
+            Doctor doc("Иванов", "И.", "И.", "D-1", "Терапевт", 5, s);
+            Patient pat("Петров", "П.", "П.", "P-1", "123", "01.01.1990", "+7");
 
             Assert::ExpectException<std::invalid_argument>([&]() {
-                Appointment invalidApp(0, doc, pat, "20.10.2026 10:00");
+                Appointment invalidApp(0, &doc, &pat, "20.10.2026 10:00");
             });
 
             Assert::ExpectException<std::invalid_argument>([&]() {
-                Appointment invalidApp(-5, doc, pat, "20.10.2026 10:00");
+                Appointment invalidApp(-5, &doc, &pat, "20.10.2026 10:00");
             });
 
-            Appointment app1(201, doc, pat, "20.10.2026 10:00");
+            Appointment app1(201, &doc, &pat, "20.10.2026 10:00");
 
             // Проверка, что ID уже занят (id проверка, что такого нет)
             Assert::ExpectException<std::invalid_argument>([&]() {
-                Appointment duplicateApp(201, doc, pat, "20.10.2026 11:00");
+                Appointment duplicateApp(201, &doc, &pat, "20.10.2026 11:00");
             });
         }
 
@@ -279,10 +278,10 @@ namespace Tests
         TEST_METHOD(RuleOfFive_Test)
         {
             Schedule s("Пн", "08:00", "12:00", "205");
-            auto doc = std::make_shared<Doctor>("Смирнов", "Е.", "П.", "D-2", "Хирург", 5, s);
-            auto pat = std::make_shared<Patient>("Васильев", "Д.", "Н.", "P-2", "999888", "10.02.1995", "+7");
+            Doctor doc("Смирнов", "Е.", "П.", "D-2", "Хирург", 5, s);
+            Patient pat("Васильев", "Д.", "Н.", "P-2", "999888", "10.02.1995", "+7");
 
-            Appointment app1(301, doc, pat, "20.10.2026 12:00");
+            Appointment app1(301, &doc, &pat, "20.10.2026 12:00");
             Appointment copy(app1);
             Assert::IsTrue(app1 == copy);
 
@@ -312,17 +311,17 @@ namespace Tests
             Assert::AreEqual(std::string("Поликлиника № 12"), clinic.GetName());
 
             Schedule s("Пн-Пт", "08:00", "14:00", "101");
-            auto doc = std::make_shared<Doctor>("Иванов", "И.", "И.", "D1", "Терапевт", 10, s);
-            auto pat = std::make_shared<Patient>("Петров", "П.", "П.", "P1", "123456", "01.01.1990", "+7");
+            Doctor doc("Иванов", "И.", "И.", "D1", "Терапевт", 10, s);
+            Patient pat("Петров", "П.", "П.", "P1", "123456", "01.01.1990", "+7");
 
-            clinic.AddDoctor(doc);
-            clinic.AddPatient(pat);
+            clinic.AddDoctor(&doc);
+            clinic.AddPatient(&pat);
 
             Assert::AreEqual(static_cast<size_t>(1), clinic.GetDoctorCount());
             Assert::AreEqual(static_cast<size_t>(1), clinic.GetPatientCount());
-            Assert::IsTrue(clinic.FindDoctorById("D1") == doc);
-            Assert::IsTrue(clinic.FindDoctorBySurname("Иванов") == doc);
-            Assert::IsTrue(clinic.FindPatientByPolicy("123456") == pat);
+            Assert::IsTrue(clinic.FindDoctorById("D1") == &doc);
+            Assert::IsTrue(clinic.FindDoctorBySurname("Иванов") == &doc);
+            Assert::IsTrue(clinic.FindPatientByPolicy("123456") == &pat);
         }
 
         /**
@@ -334,7 +333,8 @@ namespace Tests
             Assert::IsTrue(clinic.GetDoctorsSummary().find("Список врачей пуст") != std::string::npos);
 
             Schedule s("Пн-Пт", "08:00", "14:00", "101");
-            clinic.AddDoctor(std::make_shared<Doctor>("Иванов", "Иван", "Иванович", "D1", "Терапевт", 10, s));
+            Doctor doc("Иванов", "Иван", "Иванович", "D1", "Терапевт", 10, s);
+            clinic.AddDoctor(&doc);
 
             std::string summary = clinic.GetDoctorsSummary();
             Assert::IsTrue(summary.find("Всего врачей: 1") != std::string::npos);
@@ -350,7 +350,8 @@ namespace Tests
             Polyclinic clinic;
             Assert::IsTrue(clinic.GetPatientsSummary().find("Список пациентов пуст") != std::string::npos);
 
-            clinic.AddPatient(std::make_shared<Patient>("Петров", "Петр", "Петрович", "P1", "1234567890123456", "15.05.1985", "+7(916)111"));
+            Patient pat("Петров", "Петр", "Петрович", "P1", "1234567890123456", "15.05.1985", "+7(916)111");
+            clinic.AddPatient(&pat);
 
             std::string summary = clinic.GetPatientsSummary();
             Assert::IsTrue(summary.find("Всего зарегистрированных пациентов: 1") != std::string::npos);
@@ -365,13 +366,13 @@ namespace Tests
         {
             Polyclinic clinic;
             Schedule s("Пн - Пт", "08:00", "14:00", "101");
-            auto doc = std::make_shared<Doctor>("Иванов", "Иван", "Иванович", "D1", "Терапевт", 10, s);
-            auto pat = std::make_shared<Patient>("Петров", "Петр", "Петрович", "P1", "1234567890123456", "15.05.1985", "+7-916-111");
+            Doctor doc("Иванов", "Иван", "Иванович", "D1", "Терапевт", 10, s);
+            Patient pat("Петров", "Петр", "Петрович", "P1", "1234567890123456", "15.05.1985", "+7-916-111");
 
-            clinic.AddDoctor(doc);
-            clinic.AddPatient(pat);
+            clinic.AddDoctor(&doc);
+            clinic.AddPatient(&pat);
 
-            auto app = clinic.RegisterAppointment(doc, pat, "25.10.2026 10:30");
+            Appointment* app = clinic.RegisterAppointment(&doc, &pat, "25.10.2026 10:30");
             Assert::IsTrue(app->GetId() > 0);
             Assert::IsTrue(clinic.FindAppointmentById(app->GetId()) == app);
 
@@ -387,24 +388,24 @@ namespace Tests
         }
 
         /**
-         * @brief Проверка правила пяти и глубокого копирования Polyclinic
+         * @brief Проверка правила пяти для Polyclinic
          */
-        TEST_METHOD(RuleOfFive_DeepCopy_Test)
+        TEST_METHOD(RuleOfFive_Test)
         {
             Polyclinic clinic1("Исходная", "Адрес 1");
             Schedule s("Пн-Пт", "08:00", "14:00", "101");
-            auto doc = std::make_shared<Doctor>("Иванов", "И.", "И.", "D1", "Терапевт", 10, s);
-            auto pat = std::make_shared<Patient>("Петров", "П.", "П.", "P1", "123", "01.01.1990", "+7");
+            Doctor doc("Иванов", "И.", "И.", "D1", "Терапевт", 10, s);
+            Patient pat("Петров", "П.", "П.", "P1", "123", "01.01.1990", "+7");
 
-            clinic1.AddDoctor(doc);
-            clinic1.AddPatient(pat);
-            clinic1.RegisterAppointment(doc, pat, "20.10.2026 10:00");
+            clinic1.AddDoctor(&doc);
+            clinic1.AddPatient(&pat);
+            clinic1.RegisterAppointment(&doc, &pat, "20.10.2026 10:00");
 
             Polyclinic clinic2(clinic1);
             Assert::AreEqual(clinic1.GetDoctorCount(), clinic2.GetDoctorCount());
             Assert::AreEqual(clinic1.GetPatientCount(), clinic2.GetPatientCount());
             Assert::AreEqual(clinic1.GetAppointmentCount(), clinic2.GetAppointmentCount());
-            Assert::IsTrue(clinic1.GetDoctors()[0] != clinic2.GetDoctors()[0]);
+            Assert::IsTrue(clinic1.GetDoctors()[0] == clinic2.GetDoctors()[0]);
 
             Polyclinic clinic3;
             clinic3 = clinic1;

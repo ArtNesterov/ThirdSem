@@ -1,6 +1,5 @@
 #include "Polyclinic.h"
 #include <utility>
-#include <map>
 
 Polyclinic::Polyclinic()
     : name(""), address(""), nextAppointmentId(1)
@@ -15,53 +14,23 @@ Polyclinic::Polyclinic(const std::string& name, const std::string& address)
 Polyclinic::Polyclinic(const Polyclinic& other)
     : name(other.name),
       address(other.address),
+      doctors(other.doctors),
+      patients(other.patients),
+      appointments(other.appointments),
       nextAppointmentId(other.nextAppointmentId)
 {
-    std::map<std::shared_ptr<Doctor>, std::shared_ptr<Doctor>> docMap;
-    for (const auto& doc : other.doctors)
-    {
-        if (doc)
-        {
-            auto newDoc = std::make_shared<Doctor>(*doc);
-            doctors.push_back(newDoc);
-            docMap[doc] = newDoc;
-        }
-    }
-
-    std::map<std::shared_ptr<Patient>, std::shared_ptr<Patient>> patMap;
-    for (const auto& pat : other.patients)
-    {
-        if (pat)
-        {
-            auto newPat = std::make_shared<Patient>(*pat);
-            patients.push_back(newPat);
-            patMap[pat] = newPat;
-        }
-    }
-
-    for (const auto& app : other.appointments)
-    {
-        if (app)
-        {
-            auto docIt = docMap.find(app->GetDoctor());
-            auto patIt = patMap.find(app->GetPatient());
-            std::shared_ptr<Doctor> mappedDoc = (docIt != docMap.end()) ? docIt->second : (app->GetDoctor() ? std::make_shared<Doctor>(*app->GetDoctor()) : nullptr);
-            std::shared_ptr<Patient> mappedPat = (patIt != patMap.end()) ? patIt->second : (app->GetPatient() ? std::make_shared<Patient>(*app->GetPatient()) : nullptr);
-
-            auto newApp = std::make_shared<Appointment>(*app);
-            newApp->SetDoctor(mappedDoc);
-            newApp->SetPatient(mappedPat);
-            appointments.push_back(newApp);
-        }
-    }
 }
 
 Polyclinic& Polyclinic::operator=(const Polyclinic& other)
 {
     if (this != &other)
     {
-        Polyclinic temp(other);
-        *this = std::move(temp);
+        name = other.name;
+        address = other.address;
+        doctors = other.doctors;
+        patients = other.patients;
+        appointments = other.appointments;
+        nextAppointmentId = other.nextAppointmentId;
     }
     return *this;
 }
@@ -112,7 +81,7 @@ void Polyclinic::SetAddress(const std::string& addr)
     address = addr;
 }
 
-void Polyclinic::AddDoctor(const std::shared_ptr<Doctor>& doctor)
+void Polyclinic::AddDoctor(Doctor* doctor)
 {
     if (doctor)
     {
@@ -120,7 +89,7 @@ void Polyclinic::AddDoctor(const std::shared_ptr<Doctor>& doctor)
     }
 }
 
-void Polyclinic::AddPatient(const std::shared_ptr<Patient>& patient)
+void Polyclinic::AddPatient(Patient* patient)
 {
     if (patient)
     {
@@ -128,9 +97,9 @@ void Polyclinic::AddPatient(const std::shared_ptr<Patient>& patient)
     }
 }
 
-std::shared_ptr<Appointment> Polyclinic::RegisterAppointment(
-    const std::shared_ptr<Doctor>& doctor,
-    const std::shared_ptr<Patient>& patient,
+Appointment* Polyclinic::RegisterAppointment(
+    Doctor* doctor,
+    Patient* patient,
     const std::string& dateTime)
 {
     while (Appointment::IsIdExists(nextAppointmentId))
@@ -138,12 +107,12 @@ std::shared_ptr<Appointment> Polyclinic::RegisterAppointment(
         nextAppointmentId++;
     }
     const int apptId = nextAppointmentId++;
-    auto appt = std::make_shared<Appointment>(apptId, doctor, patient, dateTime);
+    Appointment* appt = new Appointment(apptId, doctor, patient, dateTime);
     appointments.push_back(appt);
     return appt;
 }
 
-std::shared_ptr<Doctor> Polyclinic::FindDoctorById(const std::string& doctorId) const
+Doctor* Polyclinic::FindDoctorById(const std::string& doctorId) const
 {
     for (const auto& doc : doctors)
     {
@@ -155,7 +124,7 @@ std::shared_ptr<Doctor> Polyclinic::FindDoctorById(const std::string& doctorId) 
     return nullptr;
 }
 
-std::shared_ptr<Doctor> Polyclinic::FindDoctorBySurname(const std::string& surname) const
+Doctor* Polyclinic::FindDoctorBySurname(const std::string& surname) const
 {
     for (const auto& doc : doctors)
     {
@@ -167,7 +136,7 @@ std::shared_ptr<Doctor> Polyclinic::FindDoctorBySurname(const std::string& surna
     return nullptr;
 }
 
-std::shared_ptr<Patient> Polyclinic::FindPatientByPolicy(const std::string& policyNumber) const
+Patient* Polyclinic::FindPatientByPolicy(const std::string& policyNumber) const
 {
     for (const auto& pat : patients)
     {
@@ -179,7 +148,7 @@ std::shared_ptr<Patient> Polyclinic::FindPatientByPolicy(const std::string& poli
     return nullptr;
 }
 
-std::shared_ptr<Appointment> Polyclinic::FindAppointmentById(const int appointmentId) const
+Appointment* Polyclinic::FindAppointmentById(const int appointmentId) const
 {
     for (const auto& app : appointments)
     {
@@ -191,9 +160,9 @@ std::shared_ptr<Appointment> Polyclinic::FindAppointmentById(const int appointme
     return nullptr;
 }
 
-std::vector<std::shared_ptr<Appointment>> Polyclinic::FindAppointmentsByPatientPolicy(const std::string& policyNumber) const
+std::vector<Appointment*> Polyclinic::FindAppointmentsByPatientPolicy(const std::string& policyNumber) const
 {
-    std::vector<std::shared_ptr<Appointment>> result;
+    std::vector<Appointment*> result;
     for (const auto& app : appointments)
     {
         if (app && app->GetPatient() && app->GetPatient()->GetPolicyNumber() == policyNumber)
@@ -204,9 +173,9 @@ std::vector<std::shared_ptr<Appointment>> Polyclinic::FindAppointmentsByPatientP
     return result;
 }
 
-std::vector<std::shared_ptr<Appointment>> Polyclinic::FindAppointmentsByDoctorId(const std::string& doctorId) const
+std::vector<Appointment*> Polyclinic::FindAppointmentsByDoctorId(const std::string& doctorId) const
 {
-    std::vector<std::shared_ptr<Appointment>> result;
+    std::vector<Appointment*> result;
     for (const auto& app : appointments)
     {
         if (app && app->GetDoctor() && app->GetDoctor()->GetId() == doctorId)
@@ -310,17 +279,17 @@ std::string Polyclinic::GetPatientAppointmentsInfo(const std::string& policyNumb
     return res;
 }
 
-const std::vector<std::shared_ptr<Doctor>>& Polyclinic::GetDoctors() const
+const std::vector<Doctor*>& Polyclinic::GetDoctors() const
 {
     return doctors;
 }
 
-const std::vector<std::shared_ptr<Patient>>& Polyclinic::GetPatients() const
+const std::vector<Patient*>& Polyclinic::GetPatients() const
 {
     return patients;
 }
 
-const std::vector<std::shared_ptr<Appointment>>& Polyclinic::GetAppointments() const
+const std::vector<Appointment*>& Polyclinic::GetAppointments() const
 {
     return appointments;
 }

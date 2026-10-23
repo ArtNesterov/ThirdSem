@@ -1,7 +1,6 @@
 #pragma once
 
 #include <string>
-#include <memory>
 #include <set>
 #include <map>
 #include "Doctor.h"
@@ -16,8 +15,8 @@ private:
     static std::set<int> existingIds;
     static std::map<int, int> idRefCount;
     int id;
-    std::shared_ptr<Doctor> doctor;
-    std::shared_ptr<Patient> patient;
+    Doctor* doctor;
+    Patient* patient;
     std::string appointmentDateTime;
 
 public:
@@ -34,8 +33,8 @@ public:
      * @param appointmentDateTime Дата и время приема
      */
     Appointment(const int id,
-                const std::shared_ptr<Doctor>& doctor,
-                const std::shared_ptr<Patient>& patient,
+                Doctor* doctor,
+                Patient* patient,
                 const std::string& appointmentDateTime);
 
     /**
@@ -83,27 +82,27 @@ public:
 
     /**
      * @brief Получить врача
-     * @return Константная ссылка на умный указатель врача
+     * @return Указатель врача
      */
-    const std::shared_ptr<Doctor>& GetDoctor() const;
+    Doctor* GetDoctor() const;
 
     /**
      * @brief Установить врача
      * @param doctor Указатель на врача
      */
-    void SetDoctor(const std::shared_ptr<Doctor>& doctor);
+    void SetDoctor(Doctor* doctor);
 
     /**
      * @brief Получить пациента
-     * @return Константная ссылка на умный указатель пациента
+     * @return Указатель пациента
      */
-    const std::shared_ptr<Patient>& GetPatient() const;
+    Patient* GetPatient() const;
 
     /**
      * @brief Установить пациента
      * @param patient Указатель на пациента
      */
-    void SetPatient(const std::shared_ptr<Patient>& patient);
+    void SetPatient(Patient* patient);
 
     /**
      * @brief Получить дату и время приема

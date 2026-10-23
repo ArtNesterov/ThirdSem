@@ -2,7 +2,6 @@
 
 #include <string>
 #include <vector>
-#include <memory>
 #include "Doctor.h"
 #include "Patient.h"
 #include "Appointment.h"
@@ -15,9 +14,9 @@ class Polyclinic
 private:
     std::string name;
     std::string address;
-    std::vector<std::shared_ptr<Doctor>> doctors;
-    std::vector<std::shared_ptr<Patient>> patients;
-    std::vector<std::shared_ptr<Appointment>> appointments;
+    std::vector<Doctor*> doctors;
+    std::vector<Patient*> patients;
+    std::vector<Appointment*> appointments;
     int nextAppointmentId;
 
 public:
@@ -39,7 +38,7 @@ public:
     ~Polyclinic() = default;
 
     /**
-     * @brief Конструктор копирования (глубокое копирование)
+     * @brief Конструктор копирования
      * @param other Копируемый объект
      */
     Polyclinic(const Polyclinic& other);
@@ -90,15 +89,15 @@ public:
 
     /**
      * @brief Регистрация нового врача в поликлинике
-     * @param doctor Умный указатель на врача
+     * @param doctor Указатель на врача
      */
-    void AddDoctor(const std::shared_ptr<Doctor>& doctor);
+    void AddDoctor(Doctor* doctor);
 
     /**
      * @brief Регистрация нового пациента в поликлинике
-     * @param patient Умный указатель на пациента
+     * @param patient Указатель на пациента
      */
-    void AddPatient(const std::shared_ptr<Patient>& patient);
+    void AddPatient(Patient* patient);
 
     /**
      * @brief Запись пациента к врачу на прием
@@ -107,51 +106,51 @@ public:
      * @param dateTime Дата и время приема
      * @return Созданный объект записи на прием
      */
-    std::shared_ptr<Appointment> RegisterAppointment(const std::shared_ptr<Doctor>& doctor,
-                                                     const std::shared_ptr<Patient>& patient,
-                                                     const std::string& dateTime);
+    Appointment* RegisterAppointment(Doctor* doctor,
+                                     Patient* patient,
+                                     const std::string& dateTime);
 
     /**
      * @brief Поиск врача по идентификатору
      * @param doctorId Идентификатор врача
      * @return Указатель на врача или nullptr
      */
-    std::shared_ptr<Doctor> FindDoctorById(const std::string& doctorId) const;
+    Doctor* FindDoctorById(const std::string& doctorId) const;
 
     /**
      * @brief Поиск врача по фамилии
      * @param surname Фамилия врача
      * @return Указатель на врача или nullptr
      */
-    std::shared_ptr<Doctor> FindDoctorBySurname(const std::string& surname) const;
+    Doctor* FindDoctorBySurname(const std::string& surname) const;
 
     /**
      * @brief Поиск пациента по номеру полиса ОМС
      * @param policyNumber Номер полиса
      * @return Указатель на пациента или nullptr
      */
-    std::shared_ptr<Patient> FindPatientByPolicy(const std::string& policyNumber) const;
+    Patient* FindPatientByPolicy(const std::string& policyNumber) const;
 
     /**
      * @brief Поиск записи по идентификатору
      * @param appointmentId Идентификатор записи
      * @return Указатель на запись или nullptr
      */
-    std::shared_ptr<Appointment> FindAppointmentById(const int appointmentId) const;
+    Appointment* FindAppointmentById(const int appointmentId) const;
 
     /**
      * @brief Поиск всех записей пациента по номеру полиса ОМС
      * @param policyNumber Номер полиса
      * @return Список записей пациента
      */
-    std::vector<std::shared_ptr<Appointment>> FindAppointmentsByPatientPolicy(const std::string& policyNumber) const;
+    std::vector<Appointment*> FindAppointmentsByPatientPolicy(const std::string& policyNumber) const;
 
     /**
      * @brief Поиск всех записей врача по его идентификатору
      * @param doctorId Идентификатор врача
      * @return Список записей к данному врачу
      */
-    std::vector<std::shared_ptr<Appointment>> FindAppointmentsByDoctorId(const std::string& doctorId) const;
+    std::vector<Appointment*> FindAppointmentsByDoctorId(const std::string& doctorId) const;
 
     /**
      * @brief Получить сводную информацию обо всех врачах поликлиники
@@ -183,19 +182,19 @@ public:
      * @brief Получить список всех врачей
      * @return Константная ссылка на вектор врачей
      */
-    const std::vector<std::shared_ptr<Doctor>>& GetDoctors() const;
+    const std::vector<Doctor*>& GetDoctors() const;
 
     /**
      * @brief Получить список всех пациентов
      * @return Константная ссылка на вектор пациентов
      */
-    const std::vector<std::shared_ptr<Patient>>& GetPatients() const;
+    const std::vector<Patient*>& GetPatients() const;
 
     /**
      * @brief Получить список всех записей
      * @return Константная ссылка на вектор записей
      */
-    const std::vector<std::shared_ptr<Appointment>>& GetAppointments() const;
+    const std::vector<Appointment*>& GetAppointments() const;
 
     /**
      * @brief Получить количество врачей

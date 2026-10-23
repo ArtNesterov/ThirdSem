@@ -1,7 +1,5 @@
 #include <iostream>
 #include <vector>
-#include <memory>
-#include <windows.h>
 #include "Person.h"
 #include "Doctor.h"
 #include "Patient.h"
@@ -20,48 +18,42 @@ int main()
     Schedule surgeonSchedule("Вт, Чт", "10:00", "16:00", "Кабинет 205");
     Schedule ophthalmologistSchedule("Пн, Ср, Пт", "12:00", "18:00", "Кабинет 310");
 
-    auto doc1 = std::make_shared<Doctor>(
-        "Иванов", "Иван", "Иванович", "DOC-001",
-        "Врач-терапевт", 12, therapistSchedule);
+    Doctor doc1("Иванов", "Иван", "Иванович", "DOC-001",
+                "Врач-терапевт", 12, therapistSchedule);
 
-    auto doc2 = std::make_shared<Doctor>(
-        "Смирнова", "Елена", "Сергеевна", "DOC-002",
-        "Врач-хирург", 8, surgeonSchedule);
+    Doctor doc2("Смирнова", "Елена", "Сергеевна", "DOC-002",
+                "Врач-хирург", 8, surgeonSchedule);
 
-    auto doc3 = std::make_shared<Doctor>(
-        "Кузнецов", "Павел", "Алексеевич", "DOC-003",
-        "Врач-офтальмолог", 15, ophthalmologistSchedule);
+    Doctor doc3("Кузнецов", "Павел", "Алексеевич", "DOC-003",
+                "Врач-офтальмолог", 15, ophthalmologistSchedule);
 
-    auto pat1 = std::make_shared<Patient>(
-        "Петров", "Петр", "Петрович", "ID-1001",
-        "1234567890123456", "15.05.1985", "+7 (916) 111-22-33");
+    Patient pat1("Петров", "Петр", "Петрович", "ID-1001",
+                 "1234567890123456", "15.05.1985", "+7 (916) 111-22-33");
 
-    auto pat2 = std::make_shared<Patient>(
-        "Сидорова", "Анна", "Владимировна", "ID-1002",
-        "9876543210987654", "22.11.1992", "+7 (926) 444-55-66");
+    Patient pat2("Сидорова", "Анна", "Владимировна", "ID-1002",
+                 "9876543210987654", "22.11.1992", "+7 (926) 444-55-66");
 
-    auto pat3 = std::make_shared<Patient>(
-        "Васильев", "Дмитрий", "Николаевич", "ID-1003",
-        "5555444433332222", "03.09.1978", "+7 (903) 777-88-99");
+    Patient pat3("Васильев", "Дмитрий", "Николаевич", "ID-1003",
+                 "5555444433332222", "03.09.1978", "+7 (903) 777-88-99");
 
-    std::vector<std::shared_ptr<Person>> people = { doc1, pat1, doc2, pat2, doc3, pat3 };
-    for (const auto& personPtr : people)
+    std::vector<Person*> people = { &doc1, &pat1, &doc2, &pat2, &doc3, &pat3 };
+    for (const auto* personPtr : people)
     {
         std::cout << personPtr->ToString() << "\n";
     }
     std::cout << "\n";
 
     Polyclinic polyclinic("Городская клиническая поликлиника № 12", "г. Москва, ул. Здоровья, д. 7");
-    polyclinic.AddDoctor(doc1);
-    polyclinic.AddDoctor(doc2);
-    polyclinic.AddDoctor(doc3);
-    polyclinic.AddPatient(pat1);
-    polyclinic.AddPatient(pat2);
-    polyclinic.AddPatient(pat3);
+    polyclinic.AddDoctor(&doc1);
+    polyclinic.AddDoctor(&doc2);
+    polyclinic.AddDoctor(&doc3);
+    polyclinic.AddPatient(&pat1);
+    polyclinic.AddPatient(&pat2);
+    polyclinic.AddPatient(&pat3);
 
-    auto app1 = polyclinic.RegisterAppointment(doc1, pat1, "20.10.2026 09:30");
-    auto app2 = polyclinic.RegisterAppointment(doc2, pat2, "21.10.2026 11:00");
-    auto app3 = polyclinic.RegisterAppointment(doc3, pat1, "22.10.2026 14:15");
+    Appointment* app1 = polyclinic.RegisterAppointment(&doc1, &pat1, "20.10.2026 09:30");
+    Appointment* app2 = polyclinic.RegisterAppointment(&doc2, &pat2, "21.10.2026 11:00");
+    Appointment* app3 = polyclinic.RegisterAppointment(&doc3, &pat1, "22.10.2026 14:15");
 
     std::cout << "ЗАДАНИЕ 1\n";
     std::cout << polyclinic.GetDoctorsSummary() << "\n";

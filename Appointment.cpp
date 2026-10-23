@@ -11,8 +11,8 @@ Appointment::Appointment()
 }
 
 Appointment::Appointment(const int id,
-                         const std::shared_ptr<Doctor>& doctor,
-                         const std::shared_ptr<Patient>& patient,
+                         Doctor* doctor,
+                         Patient*  patient,
                          const std::string& appointmentDateTime)
     : id(id),
       doctor(doctor),
@@ -88,11 +88,13 @@ Appointment& Appointment::operator=(const Appointment& other)
 
 Appointment::Appointment(Appointment&& other) noexcept
     : id(other.id),
-      doctor(std::move(other.doctor)),
-      patient(std::move(other.patient)),
+      doctor(other.doctor),
+      patient(other.patient),
       appointmentDateTime(std::move(other.appointmentDateTime))
 {
     other.id = 0;
+    other.doctor = nullptr;
+    other.patient = nullptr;
 }
 
 Appointment& Appointment::operator=(Appointment&& other) noexcept
@@ -110,10 +112,12 @@ Appointment& Appointment::operator=(Appointment&& other) noexcept
         }
 
         id = other.id;
-        doctor = std::move(other.doctor);
-        patient = std::move(other.patient);
+        doctor = other.doctor;
+        patient = other.patient;
         appointmentDateTime = std::move(other.appointmentDateTime);
         other.id = 0;
+        other.doctor = nullptr;
+        other.patient = nullptr;
     }
     return *this;
 }
@@ -147,22 +151,22 @@ void Appointment::SetId(const int newId)
     idRefCount[id] = 1;
 }
 
-const std::shared_ptr<Doctor>& Appointment::GetDoctor() const
+Doctor* Appointment::GetDoctor() const
 {
     return doctor;
 }
 
-void Appointment::SetDoctor(const std::shared_ptr<Doctor>& doc)
+void Appointment::SetDoctor(Doctor* doc)
 {
     doctor = doc;
 }
 
-const std::shared_ptr<Patient>& Appointment::GetPatient() const
+Patient* Appointment::GetPatient() const
 {
     return patient;
 }
 
-void Appointment::SetPatient(const std::shared_ptr<Patient>& pat)
+void Appointment::SetPatient(Patient* pat)
 {
     patient = pat;
 }
